@@ -5,13 +5,52 @@
 #global variables
 comp_list_dict = {} #list of components in this build
 comp_dep_list_dict = {} #dictionary that stores (component(str),dependency_list) as key and value respectively
+comp_list = [] #indexable list of components
+dep_comp_list_dict = {} #dictionary that stores (component(str), list of components that depend on this component)
 
+#called from build_dependency_graph()
+def parse_dep_list(comp,dep_list):
+	print "Hello\n"
+
+#called from main
 #build dependency graph from component build_dependency key value list
 def build_dependency_graph():
+	print "building dependency graph for this component\n"
+	ret = True
 	if not (comp_dep_list_dict):
-        	print "Error: component build_dependency key value list is empty \n"
+		print "Error: component build dependency key value list is empty \n"
+		ret = False
 	else:
-		print "ok\n"
+		count = len(comp_list)
+		if (count > 0):
+			#iterate through component list and check list order of dependencies
+			itr = 0
+			while (itr <= count - 1):
+				comp = comp_list[itr]
+				#initialize the dependent components list for this comp as empty
+				if not (dep_comp_list_dict.has_key(comp)):
+					dependent_comps = []
+					dep_comp_list_dict.update({comp:dependent_comps})
+				else:
+					print "Error: Component being examined is duplicate of an alreday existing entry\n"
+					ret = False
+					return ret
+				#get the dependency list for this component
+				#components with no dependencies wont be in this dict
+				if (comp_dep_list_dict.has_key(comp)):
+					dep_list = comp_dep_list_dict.get(comp)
+					#print comp + " has dependencies: " + str(dep_list) + "\n"
+					#parse dependency list to build dependency graph
+					ret = parse_dep_list(comp,dep_list)
+					if not (ret):
+						return ret
+				else:
+					print comp + " has no dependencies: root component\n"
+				itr = itr + 1
+		else:
+			print "Error: Empty component list \n"
+			ret = False
+	return ret
 
 #called from main()
 def get_build_info(ip_file):
@@ -51,8 +90,8 @@ def build_comp_dep_keyval_dict(component, dep_list):
                		else:
                 		print "Duplicate component parsed error \n"
                    		ret = False
-		else:
-        		print "The dependency list for " + component + " is empty\n"
+		#else:
+        	#print "The dependency list for " + component + " is empty\n"
 	else:
         	print "The " + component + "recieved is empty string error \n"
         	ret = False
@@ -67,6 +106,7 @@ def build_comp_list(component,index):
 		else:
 			print "Error: Duplicate component passed to build_comp_list routine\n"
 			ret = False
+		comp_list.append(component)
 	else:
 		print "Error: Component or index input is null \n"
 		ret = False
@@ -126,17 +166,16 @@ def get_num_of_wanted_lines(ip_file):
 
 def main():
 	ip_file = "jenkins_build_console_log.txt"
-	num_lines = get_num_of_wanted_lines(ip_file)
-	get_build_info(ip_file)
-	print "\n"
-	print "The number of wanted lines from " + ip_file + " is " + str(num_lines) + "\n"
-	#return_value = parse_build_order(ip_file)
-	#if (return_value):
-		#print "Successfully built component dependency key value pair for this build\n"
-		#print str(comp_list) + "\n"
-		#build_dependency_graph()
-	#else:
-		#print "Error: parsing build order and building component dependency key value pair list\n"
+	#num_lines = get_num_of_wanted_lines(ip_file)
+	#get_build_info(ip_file)
+	#print "\n"
+	#print "The number of wanted lines from " + ip_file + " is " + str(num_lines) + "\n"
+	return_value = parse_build_order(ip_file)
+	if (return_value):
+		print "Successfully built component dependency key value pair for this build\n"
+		build_dependency_graph()
+	else:
+		print "Error: parsing build order and building component dependency key value pair list\n"
 
 if __name__ == "__main__":
 	main()
