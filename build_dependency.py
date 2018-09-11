@@ -3,19 +3,43 @@
 #import libraries
 
 #global variables
-comp_list_dict = {} #list of components in this build
+comp_index_list_dict = {} # dictionary that stores (component(str),index(int))
 comp_dep_list_dict = {} #dictionary that stores (component(str),dependency_list) as key and value respectively
 comp_list = [] #indexable list of components
 dep_comp_list_dict = {} #dictionary that stores (component(str), list of components that depend on this component)
 
 #called from build_dependency_graph()
-def parse_dep_list(comp,dep_list):
-	print "Hello\n"
+def parse_dep_list(comp, dep_list):
+	ret = True
+	if (comp and dep_list):
+		index_val = 0
+		if (comp_index_list_dict.has_key(comp)):
+			#sdk has index val of 1 in this dict
+			comp_index = comp_index_list_dict.get(comp)
+			for val in dep_list:
+				index = comp_index_list_dict.get(val)
+				if (index > comp_index):
+					print "Error: Component " + comp + " has a dependency that will be built after this component\n"
+					return False
+				else:
+					#now update dep_comp_list_dict for 'val'
+					if (dep_comp_list_dict.has_key(val)):
+						(dep_comp_list_dict.get(val)).append(comp)
+					else:
+						print "Error: for " + comp + " dependency " + val + " not in dep_comp_list_dict\n"
+						return False
+		else:
+			print "Error: Component not in comp index dictionary\n"
+			ret = False
+	else:
+		print "Error: Null inputs to this argument\n"
+		ret = False
+	return ret
 
 #called from main
 #build dependency graph from component build_dependency key value list
 def build_dependency_graph():
-	print "building dependency graph for this component\n"
+	print "building dependency graph for this build\n"
 	ret = True
 	if not (comp_dep_list_dict):
 		print "Error: component build dependency key value list is empty \n"
@@ -43,6 +67,7 @@ def build_dependency_graph():
 					#parse dependency list to build dependency graph
 					ret = parse_dep_list(comp,dep_list)
 					if not (ret):
+						print str(dep_comp_list_dict) + "\n" 
 						return ret
 				else:
 					print comp + " has no dependencies: root component\n"
@@ -50,6 +75,8 @@ def build_dependency_graph():
 		else:
 			print "Error: Empty component list \n"
 			ret = False
+	
+	print str(dep_comp_list_dict) + "\n"
 	return ret
 
 #called from main()
@@ -98,11 +125,11 @@ def build_comp_dep_keyval_dict(component, dep_list):
 	return ret
 
 #called from parse_build_order
-def build_comp_list(component,index):
+def build_comp_list(component, index):
 	ret = True
 	if (component and index):
-		if not (comp_list_dict.has_key(component)):
-			comp_list_dict.update({component:index})
+		if not (comp_index_list_dict.has_key(component)):
+			comp_index_list_dict.update({component:index})
 		else:
 			print "Error: Duplicate component passed to build_comp_list routine\n"
 			ret = False
