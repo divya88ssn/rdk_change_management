@@ -8,6 +8,19 @@ comp_dep_list_dict = {} #dictionary that stores (component(str),dependency_list)
 comp_list = [] #indexable list of components
 dep_comp_list_dict = {} #dictionary that stores (component(str), list of components that depend on this component)
 
+
+#called from main
+def display_dependent_components(comp):
+	ret = True
+	if (comp):
+		if (dep_comp_list_dict.has_key(comp)):
+			print "Components dependent on " + comp + " for build are " + str(dep_comp_list_dict.get(comp)) + "\n"
+		else:
+			ret = False
+	else:
+	  ret = False
+	return ret
+
 #called from build_dependency_graph()
 def parse_dep_list(comp, dep_list):
 	ret = True
@@ -202,8 +215,11 @@ def main():
 		print "Successfully built component dependency key value pair for this build\n"
 		ret = build_dependency_graph()
 		if (ret):
-			#print str(dep_comp_list_dict) + "\n"
 			print "Successfully built dependency graph for the given build\n"
+			comp = "sdk"
+			ret = display_dependent_components(comp)
+			if not(ret):
+				print "Error: Displaying dependent components for " + comp + "\n"
 	else:
 		print "Error: parsing build order and building component dependency key value pair list\n"
 
