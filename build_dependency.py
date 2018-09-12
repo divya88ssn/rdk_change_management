@@ -17,6 +17,7 @@ def parse_dep_list(comp, dep_list):
 			#sdk has index val of 1 in this dict
 			comp_index = comp_index_list_dict.get(comp)
 			for val in dep_list:
+				val = val.strip()
 				index = comp_index_list_dict.get(val)
 				if (index > comp_index):
 					print "Error: Component " + comp + " has a dependency that will be built after this component\n"
@@ -27,7 +28,8 @@ def parse_dep_list(comp, dep_list):
 						(dep_comp_list_dict.get(val)).append(comp)
 					else:
 						print "Error: for " + comp + " dependency " + val + " not in dep_comp_list_dict\n"
-						return False
+						print "The index of " + val + " is " + str(index) + "\n"
+						#return False
 		else:
 			print "Error: Component not in comp index dictionary\n"
 			ret = False
@@ -67,7 +69,7 @@ def build_dependency_graph():
 					#parse dependency list to build dependency graph
 					ret = parse_dep_list(comp,dep_list)
 					if not (ret):
-						print str(dep_comp_list_dict) + "\n" 
+						#print str(dep_comp_list_dict) + "\n" 
 						return ret
 				else:
 					print comp + " has no dependencies: root component\n"
@@ -76,7 +78,7 @@ def build_dependency_graph():
 			print "Error: Empty component list \n"
 			ret = False
 	
-	print str(dep_comp_list_dict) + "\n"
+	#print str(dep_comp_list_dict) + "\n"
 	return ret
 
 #called from main()
@@ -200,7 +202,9 @@ def main():
 	return_value = parse_build_order(ip_file)
 	if (return_value):
 		print "Successfully built component dependency key value pair for this build\n"
-		build_dependency_graph()
+		ret = build_dependency_graph()
+		if (ret):
+			print str(dep_comp_list_dict.get("sdk")) + "\n"
 	else:
 		print "Error: parsing build order and building component dependency key value pair list\n"
 
