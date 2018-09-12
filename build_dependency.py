@@ -7,7 +7,37 @@ comp_index_list_dict = {} # dictionary that stores (component(str),index(int))
 comp_dep_list_dict = {} #dictionary that stores (component(str),dependency_list) as key and value respectively
 comp_list = [] #indexable list of components
 dep_comp_list_dict = {} #dictionary that stores (component(str), list of components that depend on this component)
+comp_rev_path_list_dict = {} #dictionary that stores (componen gerrit revision(str), gerrit repo path of the component(str))
 
+#called from main
+def parse_comp_revisions(ip_file):
+	ret = True
+	start_parsing = False
+	stop_parsing = False
+	with open(ip_file) as bldOutput:
+		for line in bldOutput:
+			if (start_parsing and not stop_parsing):
+				split_list = line.split(":")
+				if (len(split_list) >= 2):
+					protocol = split_list[0].strip()
+					index = 2
+					if (protocol != "ssh"):
+						index = 1
+					path = split_list[index].strip()
+					#print "Path is " + path + "\n"
+					rev = split_list[-3].split("|")[0].strip()
+					print "Rev is " + rev + "\n"
+					#if not (comp_rev_path_list_dict.has_key(rev)):
+						#path = split_list[2].strip()
+						#comp_rev_path_list_dict.update({rev:path})
+					#else:
+						#print "Error: rev is " + rev + ", path is " + path + "\n"
+						#ret = False
+			if ("REVISION HISTORY FOR EXTERNALS" in line):
+				start_parsing = True
+			if ("----------------------------------------------" in line):
+				stop_parsing = True
+	return ret
 
 #called from main
 def display_dependent_components(comp):
@@ -222,6 +252,11 @@ def main():
 				print "Error: Displaying dependent components for " + comp + "\n"
 	else:
 		print "Error: parsing build order and building component dependency key value pair list\n"
+	ret = parse_comp_revisions(ip_file)
+	if (ret):
+		print "Successfully parsed gerrit revision ids for the components in this build\n"
+	else:
+		print "Error: parsing component gerrit revision ids for this build\n"
 
 if __name__ == "__main__":
 	main()
