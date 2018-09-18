@@ -235,14 +235,15 @@ def get_num_of_wanted_lines(ip_file):
 	return cnt
 
 def main():
-	ip_file = "jenkins_build_console_log.txt"
+	ip_file = "jenkins_build_console_log_2.txt"
 	#num_lines = get_num_of_wanted_lines(ip_file)
-	#get_build_info(ip_file)
+	get_build_info(ip_file)
 	#print "\n"
 	#print "The number of wanted lines from " + ip_file + " is " + str(num_lines) + "\n"
 	return_value = parse_build_order(ip_file)
 	if (return_value):
 		print "Successfully built component dependency key value pair for this build\n"
+		print "The components for this build are " + str(comp_list) + "\n"
 		ret = build_dependency_graph()
 		if (ret):
 			print "Successfully built dependency graph for the given build\n"
@@ -252,11 +253,11 @@ def main():
 				print "Error: Displaying dependent components for " + comp + "\n"
 	else:
 		print "Error: parsing build order and building component dependency key value pair list\n"
-	ret = parse_comp_revisions(ip_file)
-	if (ret):
-		print "Successfully parsed gerrit revision ids for the components in this build\n"
-	else:
-		print "Error: parsing component gerrit revision ids for this build\n"
+	#ret = parse_comp_revisions(ip_file)
+	#if (ret):
+		#print "Successfully parsed gerrit revision ids for the components in this build\n"
+	#else:
+		#print "Error: parsing component gerrit revision ids for this build\n"
 
 if __name__ == "__main__":
 	main()
