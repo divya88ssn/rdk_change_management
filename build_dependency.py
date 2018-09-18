@@ -1,6 +1,7 @@
 #/home/divyaven/bin/python
 
 #import libraries
+import sys
 
 #global variables
 comp_index_list_dict = {} # dictionary that stores (component(str),index(int))
@@ -14,10 +15,18 @@ def parse_comp_revisions(ip_file):
 	ret = True
 	start_parsing = False
 	stop_parsing = False
+	count = 0
 	with open(ip_file) as bldOutput:
 		for line in bldOutput:
 			if (start_parsing and not stop_parsing):
-				split_list = line.split(":")
+				#get component revision
+				split_list = line.split("|")
+				if (len(split_list) >= 2):
+					rev = split_list[0].strip().split(":")[-1].strip()
+					count = count + 1
+					print "Rev is " + rev + "\n"
+
+				'''split_list = line.split(":")
 				if (len(split_list) >= 2):
 					protocol = split_list[0].strip()
 					index = 2
@@ -32,11 +41,13 @@ def parse_comp_revisions(ip_file):
 						#comp_rev_path_list_dict.update({rev:path})
 					#else:
 						#print "Error: rev is " + rev + ", path is " + path + "\n"
-						#ret = False
+						#ret = False'''
 			if ("REVISION HISTORY FOR EXTERNALS" in line):
 				start_parsing = True
 			if ("----------------------------------------------" in line):
 				stop_parsing = True
+
+	print "Number of lines processed are " + str(count) + "\n"
 	return ret
 
 #called from main
@@ -235,29 +246,32 @@ def get_num_of_wanted_lines(ip_file):
 	return cnt
 
 def main():
+	
+	#for arg in sys.argv[1:]:
+		#print "Inside build_dependency.py " + arg + "\n"
 	ip_file = "jenkins_build_console_log_3.txt"
 	#num_lines = get_num_of_wanted_lines(ip_file)
-	get_build_info(ip_file)
+	#get_build_info(ip_file)
 	#print "\n"
 	#print "The number of wanted lines from " + ip_file + " is " + str(num_lines) + "\n"
 	return_value = parse_build_order(ip_file)
 	if (return_value):
 		print "Successfully built component dependency key value pair for this build\n"
-		print "The components for this build are " + str(comp_list) + "\n"
+		#print "The components for this build are " + str(comp_list) + "\n"
 		ret = build_dependency_graph()
 		if (ret):
 			print "Successfully built dependency graph for the given build\n"
-			comp = "sdk"
+			comp = "ems"
 			ret = display_dependent_components(comp)
 			if not(ret):
 				print "Error: Displaying dependent components for " + comp + "\n"
 	else:
 		print "Error: parsing build order and building component dependency key value pair list\n"
-	#ret = parse_comp_revisions(ip_file)
-	#if (ret):
-		#print "Successfully parsed gerrit revision ids for the components in this build\n"
-	#else:
-		#print "Error: parsing component gerrit revision ids for this build\n"
+	ret = parse_comp_revisions(ip_file)
+	if (ret):
+		print "Successfully parsed gerrit revision ids for the components in this build\n"
+	else:
+		print "Error: parsing component gerrit revision ids for this build\n"
 
 if __name__ == "__main__":
 	main()
