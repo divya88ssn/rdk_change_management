@@ -235,7 +235,7 @@ def get_num_of_wanted_lines(ip_file):
 	return cnt
 
 def main():
-	ip_file = "jenkins_build_console_log_2.txt"
+	ip_file = "jenkins_build_console_log_3.txt"
 	#num_lines = get_num_of_wanted_lines(ip_file)
 	get_build_info(ip_file)
 	#print "\n"
