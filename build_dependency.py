@@ -19,6 +19,13 @@ def parse_comp_revisions(ip_file):
 	with open(ip_file) as bldOutput:
 		for line in bldOutput:
 			if (start_parsing and not stop_parsing):
+				#get branch and component path
+				split_list = line.split("@")
+				if (len(split_list) >= 2):
+					branch = split_list[1].strip().split(":")[0].strip()
+					print "Component branch is " + branch + "\n"
+					path = split_list[0].strip().split(":")[-1].strip()
+					print "Component path is " + path  + "\n"
 				#get component revision
 				split_list = line.split("|")
 				if (len(split_list) >= 2):
@@ -26,22 +33,8 @@ def parse_comp_revisions(ip_file):
 					count = count + 1
 					print "Rev is " + rev + "\n"
 
-				'''split_list = line.split(":")
-				if (len(split_list) >= 2):
-					protocol = split_list[0].strip()
-					index = 2
-					if (protocol != "ssh"):
-						index = 1
-					path = split_list[index].strip()
-					#print "Path is " + path + "\n"
-					rev = split_list[-3].split("|")[0].strip()
-					print "Rev is " + rev + "\n"
-					#if not (comp_rev_path_list_dict.has_key(rev)):
-						#path = split_list[2].strip()
-						#comp_rev_path_list_dict.update({rev:path})
-					#else:
-						#print "Error: rev is " + rev + ", path is " + path + "\n"
-						#ret = False'''
+				print "-----------------------------------------------\n"
+
 			if ("REVISION HISTORY FOR EXTERNALS" in line):
 				start_parsing = True
 			if ("----------------------------------------------" in line):
@@ -257,7 +250,7 @@ def main():
 	return_value = parse_build_order(ip_file)
 	if (return_value):
 		print "Successfully built component dependency key value pair for this build\n"
-		#print "The components for this build are " + str(comp_list) + "\n"
+		print "The components for this build are " + str(comp_list) + "\n"
 		ret = build_dependency_graph()
 		if (ret):
 			print "Successfully built dependency graph for the given build\n"
