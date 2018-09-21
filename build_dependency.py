@@ -8,7 +8,8 @@ comp_index_list_dict = {} # dictionary that stores (component(str),index(int))
 comp_dep_list_dict = {} #dictionary that stores (component(str),dependency_list) as key and value respectively
 comp_list = [] #indexable list of components
 dep_comp_list_dict = {} #dictionary that stores (component(str), list of components that depend on this component)
-comp_rev_path_list_dict = {} #dictionary that stores (componen gerrit revision(str), gerrit repo path of the component(str))
+path_rev_dict = {} #dictionary that stores (component path(str), component revision id(str))
+path_branch_dict = {} #dictionary that stores (component path(str), branch(str))
 
 #called from main
 def parse_comp_revisions(ip_file):
@@ -23,17 +24,21 @@ def parse_comp_revisions(ip_file):
 				split_list = line.split("@")
 				if (len(split_list) >= 2):
 					branch = split_list[1].strip().split(":")[0].strip()
-					print "Component branch is " + branch + "\n"
+					#print "Component branch is " + branch + "\n"
 					path = split_list[0].strip().split(":")[-1].strip()
-					print "Component path is " + path  + "\n"
+					#print "Component path is " + path  + "\n"
+					if not (path_branch_dict.has_key(path)):
+						path_branch_dict.update({path:branch})
 				#get component revision
 				split_list = line.split("|")
 				if (len(split_list) >= 2):
 					rev = split_list[0].strip().split(":")[-1].strip()
 					count = count + 1
-					print "Rev is " + rev + "\n"
+					#print "Rev is " + rev + "\n"
+					if not (path_rev_dict.has_key(path)):
+						path_rev_dict.update({path:rev})
 
-				print "-----------------------------------------------\n"
+				#print "-----------------------------------------------\n"
 
 			if ("REVISION HISTORY FOR EXTERNALS" in line):
 				start_parsing = True
