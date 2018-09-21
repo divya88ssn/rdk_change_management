@@ -4,12 +4,14 @@
 import sys
 
 #global variables
-comp_index_list_dict = {} # dictionary that stores (component(str),index(int))
-comp_dep_list_dict = {} #dictionary that stores (component(str),dependency_list) as key and value respectively
-comp_list = [] #indexable list of components
-dep_comp_list_dict = {} #dictionary that stores (component(str), list of components that depend on this component)
-path_rev_dict = {} #dictionary that stores (component path(str), component revision id(str))
-path_branch_dict = {} #dictionary that stores (component path(str), branch(str))
+comp_index_list_dict = {} 	# dictionary that stores (component(str),index(int))
+comp_dep_list_dict = {} 	#dictionary that stores (component(str),dependency_list) as key and value respectively
+comp_list = [] 			#indexable list of components
+dep_comp_list_dict = {} 	#dictionary that stores (component(str), list of components that depend on this component)
+path_rev_dict = {} 		#dictionary that stores (component path(str), component revision id(str))
+path_branch_dict = {} 		#dictionary that stores (component path(str), branch(str))
+path_list =[]			#list of component repo paths		
+dummy_list = []
 
 #called from main
 def parse_comp_revisions(ip_file):
@@ -27,16 +29,22 @@ def parse_comp_revisions(ip_file):
 					#print "Component branch is " + branch + "\n"
 					path = split_list[0].strip().split(":")[-1].strip()
 					#print "Component path is " + path  + "\n"
-					if not (path_branch_dict.has_key(path)):
-						path_branch_dict.update({path:branch})
+					if (path):
+						is_generic = path.split("/")[-1].strip()
+						if (is_generic == "generic"):
+							dummy_list.append(path.split("/")[-2].strip())
+						path_list.append(path)
+						if not (path_branch_dict.has_key(path)):
+							path_branch_dict.update({path:branch})
 				#get component revision
 				split_list = line.split("|")
 				if (len(split_list) >= 2):
 					rev = split_list[0].strip().split(":")[-1].strip()
 					count = count + 1
 					#print "Rev is " + rev + "\n"
-					if not (path_rev_dict.has_key(path)):
-						path_rev_dict.update({path:rev})
+					if (path):
+						if not (path_rev_dict.has_key(path)):
+							path_rev_dict.update({path:rev})
 
 				#print "-----------------------------------------------\n"
 
@@ -256,6 +264,7 @@ def main():
 	if (return_value):
 		print "Successfully built component dependency key value pair for this build\n"
 		print "The components for this build are " + str(comp_list) + "\n"
+		print "The number of components listed in the build order are " + str(len(comp_list)) + "\n"
 		ret = build_dependency_graph()
 		if (ret):
 			print "Successfully built dependency graph for the given build\n"
@@ -268,6 +277,8 @@ def main():
 	ret = parse_comp_revisions(ip_file)
 	if (ret):
 		print "Successfully parsed gerrit revision ids for the components in this build\n"
+		print "The list of paths of the components in this build are " + str(dummy_list) + "\n"
+		print "The number of components in the path list ending with /generic is " +  str(len(dummy_list)) + "\n"
 	else:
 		print "Error: parsing component gerrit revision ids for this build\n"
 
