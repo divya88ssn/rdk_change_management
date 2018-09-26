@@ -10,8 +10,9 @@ comp_list = [] 			#indexable list of components
 dep_comp_list_dict = {} 	#dictionary that stores (component(str), list of components that depend on this component)
 path_rev_dict = {} 		#dictionary that stores (component path(str), component revision id(str))
 path_branch_dict = {} 		#dictionary that stores (component path(str), branch(str))
-path_list =[]			#list of component repo paths		
-dummy_list = []
+path_list =[]			#list of component repo paths
+path_comp_map_dict = {}
+dummy_list = []			#list of components whose path end with /generic
 
 #called from main
 def parse_comp_revisions(ip_file):
@@ -32,7 +33,9 @@ def parse_comp_revisions(ip_file):
 					if (path):
 						is_generic = path.split("/")[-1].strip()
 						if (is_generic == "generic"):
-							dummy_list.append(path.split("/")[-2].strip())
+							path_of_comp = path.split("/")[-2].strip()
+							dummy_list.append(path_of_comp)
+							path_comp_map_dict.update({path_of_comp:path})
 						path_list.append(path)
 						if not (path_branch_dict.has_key(path)):
 							path_branch_dict.update({path:branch})
@@ -257,7 +260,7 @@ def main():
 		#print "Inside build_dependency.py " + arg + "\n"
 	ip_file = "jenkins_build_console_log_3.txt"
 	#num_lines = get_num_of_wanted_lines(ip_file)
-	#get_build_info(ip_file)
+	get_build_info(ip_file)
 	#print "\n"
 	#print "The number of wanted lines from " + ip_file + " is " + str(num_lines) + "\n"
 	return_value = parse_build_order(ip_file)
@@ -268,7 +271,8 @@ def main():
 		ret = build_dependency_graph()
 		if (ret):
 			print "Successfully built dependency graph for the given build\n"
-			comp = "ems"
+			comp = "video-analytics"
+			print comp + " has dependency on " + str(comp_dep_list_dict[comp]) + "\n"
 			ret = display_dependent_components(comp)
 			if not(ret):
 				print "Error: Displaying dependent components for " + comp + "\n"
@@ -277,8 +281,10 @@ def main():
 	ret = parse_comp_revisions(ip_file)
 	if (ret):
 		print "Successfully parsed gerrit revision ids for the components in this build\n"
-		print "The list of paths of the components in this build are " + str(dummy_list) + "\n"
-		print "The number of components in the path list ending with /generic is " +  str(len(dummy_list)) + "\n"
+		path = path_comp_map_dict.get("video-analytics")
+		print "Comp revision for " + comp + " is " + path_rev_dict[path] + "\n"
+		#print "The list of paths of the components in this build are " + str(dummy_list) + "\n"
+		#print "The number of components in the path list ending with /generic is " +  str(len(dummy_list)) + "\n"
 	else:
 		print "Error: parsing component gerrit revision ids for this build\n"
 
